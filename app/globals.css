@@ -1,0 +1,412 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: #161616
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: #bcee45;
+  --primary-foreground: #161616;
+  --sidebar-primary: #bcee45;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+
+/* Add these styles to your globals.css for enhanced landing page effects */
+
+/* Custom scrollbar for the dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #323232;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bcee45;
+}
+
+/* Glowing text effect */
+.glow-text {
+  text-shadow: 0 0 10px rgba(188, 238, 69, 0.5);
+}
+
+/* 3D Button effect */
+.btn-3d {
+  transform: translateY(0);
+  box-shadow: 0 4px 0 #9bc42c;
+  transition: all 0.2s;
+}
+
+.btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #9bc42c;
+}
+
+.btn-3d:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 0 #9bc42c;
+}
+
+/* Floating animation for elements */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Glitch effect for text */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -1px 0 #bcee45;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -1px 0 #00f;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim-2 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% {
+    clip: rect(79px, 9999px, 90px, 0);
+  }
+  5% {
+    clip: rect(22px, 9999px, 39px, 0);
+  }
+  10% {
+    clip: rect(35px, 9999px, 4px, 0);
+  }
+  15% {
+    clip: rect(9px, 9999px, 85px, 0);
+  }
+  20% {
+    clip: rect(61px, 9999px, 15px, 0);
+  }
+  25% {
+    clip: rect(15px, 9999px, 30px, 0);
+  }
+  30% {
+    clip: rect(2px, 9999px, 76px, 0);
+  }
+  35% {
+    clip: rect(16px, 9999px, 66px, 0);
+  }
+  40% {
+    clip: rect(89px, 9999px, 76px, 0);
+  }
+  45% {
+    clip: rect(8px, 9999px, 96px, 0);
+  }
+  50% {
+    clip: rect(91px, 9999px, 3px, 0);
+  }
+  55% {
+    clip: rect(87px, 9999px, 37px, 0);
+  }
+  60% {
+    clip: rect(2px, 9999px, 44px, 0);
+  }
+  65% {
+    clip: rect(70px, 9999px, 12px, 0);
+  }
+  70% {
+    clip: rect(15px, 9999px, 4px, 0);
+  }
+  75% {
+    clip: rect(75px, 9999px, 30px, 0);
+  }
+  80% {
+    clip: rect(28px, 9999px, 100px, 0);
+  }
+  85% {
+    clip: rect(51px, 9999px, 35px, 0);
+  }
+  90% {
+    clip: rect(35px, 9999px, 31px, 0);
+  }
+  95% {
+    clip: rect(72px, 9999px, 7px, 0);
+  }
+  100% {
+    clip: rect(31px, 9999px, 35px, 0);
+  }
+}
+
+@keyframes glitch-anim-2 {
+  0% {
+    clip: rect(66px, 9999px, 66px, 0);
+  }
+  5% {
+    clip: rect(22px, 9999px, 98px, 0);
+  }
+  10% {
+    clip: rect(40px, 9999px, 33px, 0);
+  }
+  15% {
+    clip: rect(21px, 9999px, 25px, 0);
+  }
+  20% {
+    clip: rect(35px, 9999px, 25px, 0);
+  }
+  25% {
+    clip: rect(35px, 9999px, 10px, 0);
+  }
+  30% {
+    clip: rect(60px, 9999px, 88px, 0);
+  }
+  35% {
+    clip: rect(50px, 9999px, 60px, 0);
+  }
+  40% {
+    clip: rect(51px, 9999px, 29px, 0);
+  }
+  45% {
+    clip: rect(53px, 9999px, 31px, 0);
+  }
+  50% {
+    clip: rect(62px, 9999px, 65px, 0);
+  }
+  55% {
+    clip: rect(44px, 9999px, 98px, 0);
+  }
+  60% {
+    clip: rect(12px, 9999px, 35px, 0);
+  }
+  65% {
+    clip: rect(58px, 9999px, 21px, 0);
+  }
+  70% {
+    clip: rect(23px, 9999px, 69px, 0);
+  }
+  75% {
+    clip: rect(41px, 9999px, 69px, 0);
+  }
+  80% {
+    clip: rect(1px, 9999px, 11px, 0);
+  }
+  85% {
+    clip: rect(55px, 9999px, 49px, 0);
+  }
+  90% {
+    clip: rect(0px, 9999px, 68px, 0);
+  }
+  95% {
+    clip: rect(50px, 9999px, 69px, 0);
+  }
+  100% {
+    clip: rect(80px, 9999px, 71px, 0);
+  }
+}
+
+/* Neon border effect */
+.neon-border {
+  box-shadow: 0 0 5px #bcee45, 0 0 10px #bcee45, 0 0 15px #bcee45;
+  animation: neon-pulse 2s infinite alternate;
+}
+
+@keyframes neon-pulse {
+  from {
+    box-shadow: 0 0 5px #bcee45, 0 0 10px #bcee45, 0 0 15px #bcee45;
+  }
+  to {
+    box-shadow: 0 0 10px #bcee45, 0 0 20px #bcee45, 0 0 30px #bcee45;
+  }
+}
+
+/* Cyberpunk gradient animation */
+.cyber-gradient {
+  background: linear-gradient(
+    45deg,
+    #bcee45,
+    #9bc42c,
+    #22d3ee,
+    #0ea5e9,
+    #bcee45
+  );
+  background-size: 400% 400%;
+  animation: cyber-gradient 15s ease infinite;
+}
+
+@keyframes cyber-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Matrix-style raining code effect (for special sections) */
+.matrix-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+.matrix-rain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='0' y='10' fill='%23bcee45'%3E01%3C/text%3E%3Ctext x='20' y='30' fill='%23bcee45'%3E10%3C/text%3E%3Ctext x='40' y='50' fill='%23bcee45'%3E01%3C/text%3E%3Ctext x='60' y='70' fill='%23bcee45'%3E10%3C/text%3E%3Ctext x='80' y='90' fill='%23bcee45'%3E01%3C/text%3E%3C/svg%3E");
+  animation: matrix-fall 20s linear infinite;
+}
+
+@keyframes matrix-fall {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 1000px;
+  }
+}

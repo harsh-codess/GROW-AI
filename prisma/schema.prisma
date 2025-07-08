@@ -1,0 +1,646 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String                  @id @default(cuid())
+  name                   String?
+  bio                    String?
+  email                  String                  @unique
+  password               String? // Hashed
+  emailVerified          DateTime?
+  image                  String?
+  role                   UserRole                @default(USER)
+  companyId              String?
+  company                Company?                @relation(fields: [companyId], references: [id])
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  sessions               Session[]
+  contentItems           ContentItem[]
+  voiceAgents            VoiceAgent[]
+  chatMessages           ChatMessage[] // Added for chat history
+  analyticsEvents        AnalyticsEvent[] // Added for analytics tracking
+  activityLogs           ActivityLog[] // Added relation to ActivityLog
+  chatConversations      ChatConversation[] // Added relation to ChatConversation
+  campaigns              Campaign[]              @relation("UserCampaigns") // Marketing campaigns  
+  documentProcessingJobs DocumentProcessingJob[] // Added relation to DocumentProcessingJob
+  socialConnections      SocialConnection[] // Added relation to SocialConnection
+  analyticsData          AnalyticsData[] // Added relation to AnalyticsData
+  Account                Account[]
+  assistants             Assistant[]
+  phoneNumbers           PhoneNumber[]           @relation("UserPhoneNumbers")
+  voiceCampaigns         Campaign[]              @relation("UserVoiceCampaigns") // Voice campaigns
+  contactLists           contactList[]           @relation("UserContactLists")
+  credits                Float                   @default(20) // Credits for voice calls (1 credit = 1 minute)
+  callHistory            CallHistory[]           @relation("UserCallHistory")
+  incomingCallConfig     IncomingCallConfig?
+  emailCampaign          EmailCampaign[]
+    businessPlans BusinessPlan[]
+
+}
+
+model Lead {
+  id           String    @id @default(cuid())
+  email        String
+  name         String?
+  data         Json // Additional context/info from CSV
+  campaignId   String
+  campaign     Campaign? @relation(fields: [campaignId], references: [id])
+  status       String    @default("pending") // "pending", "sent", "failed"
+  sentAt       DateTime?
+  emailContent String?   @db.Text // Store the generated email content
+  subject      String? // Store the email subject
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Company Model
+model Company {
+  id                     String                      @id @default(cuid())
+  name                   String
+  website                String?
+  industry               String?
+  size                   String?
+  fundingStage           String?
+  logo                   String? // URL to logo image
+  primaryColor           String? // Brand color
+  missionStatement       String?                     @db.Text
+  targetAudience         String?                     @db.Text
+  description            String?                     @db.Text
+  vectorStoreId          String? // Pinecone namespace
+  onboardingCompleted    Boolean                     @default(false)
+  users                  User[]
+  contentItems           ContentItem[]
+  voiceAgents            VoiceAgent[]
+  documents              Document[] // Added relation to Document
+  activityLogs           ActivityLog[] // Added relation to ActivityLog
+  analyticsEvents        AnalyticsEvent[] // Added relation to AnalyticsEvent
+  chatConversations      ChatConversation[] // Added relation to ChatConversation
+  productImages          ProductImage[] // Added relation to ProductImage
+  photographySessions    ProductPhotographySession[] // Added relation to ProductPhotographySession
+  videoSessions          ProductVideoSession[] // Added relation to ProductVideoSession
+  videos                 ProductVideo[] // Added relation to ProductVideo
+  documentProcessingJobs DocumentProcessingJob[] // Added relation to DocumentProcessingJob
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+    businessPlans BusinessPlan[]
+
+}
+
+model ContentItem {
+  id          String    @id @default(cuid())
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type        String // "blog-post", "instagram", "twitter", "linkedin", "facebook", "email", "product-description", "ad-copy"
+  platform    String? // For social: "instagram", "twitter", etc.
+  title       String
+  content     String    @db.Text
+  rawContent  Json? // Metadata about the content generation
+  imageUrl    String? // Featured image URL
+  status      String // "draft", "published", "scheduled"
+  publishDate DateTime?
+  createdBy   String
+  user        User      @relation(fields: [createdBy], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Voice Agent Models
+model VoiceAgent {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  phoneNumber String? // Assigned Twilio number
+  voiceId     String // Ultravox voice identifier
+  active      Boolean  @default(false)
+  scriptId    String?
+  script      Script?  @relation(fields: [scriptId], references: [id])
+  createdBy   String
+  user        User     @relation(fields: [createdBy], references: [id])
+  calls       Call[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Script {
+  id          String       @id @default(cuid())
+  name        String
+  greeting    String       @db.Text
+  faq         Json // Array of FAQ objects
+  fallback    String       @db.Text
+  voiceAgents VoiceAgent[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Call {
+  id            String     @id @default(cuid())
+  agentId       String
+  agent         VoiceAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  callerNumber  String
+  duration      Int? // Seconds
+  recordingUrl  String? // S3 URL
+  transcriptUrl String? // S3 URL
+  summary       String?    @db.Text
+  status        String // "completed", "missed", "failed"
+  createdAt     DateTime   @default(now())
+}
+
+// Product Image Models
+model ProductPhotographySession {
+  id          String         @id @default(cuid())
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  productType String // e.g., "electronics", "fashion", "food"
+  style       String // e.g., "minimal", "lifestyle", "studio"
+  status      String // "draft", "processing", "completed"
+  images      ProductImage[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ProductImage {
+  id            String                    @id @default(cuid())
+  sessionId     String
+  session       ProductPhotographySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  companyId     String
+  company       Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  originalUrl   String // Original uploaded image
+  generatedUrls String[] // Array of generated image URLs
+  style         String // Style used for generation
+  background    String // Background type
+  prompt        String? // The prompt used for generation
+  status        String // "processing", "completed", "failed"
+  isSelected    Boolean                   @default(false) // Whether user selected this image
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+}
+
+// Video Generation Models
+model ProductVideoSession {
+  id          String        @id @default(cuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  productType String // Type of product being showcased
+  status      String // "processing", "completed", "failed"
+  video       ProductVideo?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ProductVideo {
+  id                 String              @id @default(cuid())
+  sessionId          String              @unique
+  session            ProductVideoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  companyId          String
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  originalImageUrl   String // Original uploaded image
+  generatedImageUrls String[] // Array of generated angle images
+  videoUrl           String // URL of the compiled video
+  status             String // "processing", "completed", "failed"
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+// Document Processing Models
+model DocumentProcessingJob {
+  id            String   @id @default(cuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filePath      String
+  fileName      String
+  fileType      String // "pdf", "docx", "txt", etc.
+  status        String // "queued", "processing", "completed", "failed"
+  error         String?
+  vectorStoreId String? // Qdrant collection ID
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String   @db.Text
+  embedding  Float[] // Vector embedding
+  metadata   Json? // Additional metadata
+  createdAt  DateTime @default(now())
+}
+
+// Update Document model to include vector store info
+model Document {
+  id            String          @id @default(cuid())
+  companyId     String
+  company       Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  fileUrl       String // URL to the document file
+  fileType      String // PDF, DOCX, etc.
+  content       String?         @db.Text // Extracted text content
+  status        String // "uploaded", "processing", "indexed", "failed"
+  vectorStoreId String? // Qdrant collection ID
+  chunks        DocumentChunk[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model ActivityLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  activityType String // "content_created", "image_generated", "chat_message", etc.
+  description  String
+  metadata     Json? // Additional data about the activity
+  createdAt    DateTime @default(now())
+}
+
+// Added Analytics Event tracking
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  eventType String // "page_view", "content_engagement", "conversion", etc.
+  eventData Json? // Event-specific data
+  createdAt DateTime @default(now())
+}
+
+// Added Chat models for the chat feature
+model ChatConversation {
+  id        String        @id @default(cuid())
+  title     String
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  role           String // "user" or "assistant"
+  content        String           @db.Text
+  createdAt      DateTime         @default(now())
+}
+
+// Social connection model
+model SocialConnection {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform              String // "youtube", "instagram", "linkedin"
+  platformUserId        String
+  platformUsername      String?
+  isEnabled             Boolean   @default(true)
+  isVerified            Boolean   @default(true)
+  accessToken           String?
+  refreshToken          String?
+  tokenType             String?
+  tokenExpiry           DateTime?
+  scope                 String?
+  accountType           String? // For distinguishing business/personal accounts
+  lastFetch             DateTime?
+  lastAnalyticsFetch    DateTime?
+  lastDemographicsFetch DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([userId, platform])
+}
+
+// Analytics data model for caching
+model AnalyticsData {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform  String // "youtube", "instagram", "linkedin"
+  dataType  String // "profile", "posts", "demographics", "insights", etc.
+  data      Json // The cached analytics data
+  expiry    DateTime // When this cache should expire
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, platform, dataType])
+}
+
+// Authentication models for NextAuth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum speakFirstType {
+  CLIENT
+  AGENT
+}
+
+enum CampaignStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  PAUSED
+  FAILED
+}
+
+enum CampaignType {
+  OUTBOUND_CALLS
+  SMS
+  MIXED
+}
+
+model Assistant {
+  id                 String               @id @default(cuid())
+  name               String
+  goal               String?
+  companyName        String?
+  speakFirst         speakFirstType       @default(AGENT)
+  systemPrompt       String
+  model              String
+  voice              String               @default("Mark")
+  language           String               @default("english")
+  temprature         Float                @default(0.3)
+  maxCallDuration    Int                  @default(180)
+  userId             String
+  user               User                 @relation(fields: [userId], references: [id])
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Campaign           Campaign[]
+  IncomingCallConfig IncomingCallConfig[]
+  knowledgeBase      KnowledgeBase[]
+}
+
+model IncomingCallConfig {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  assistantId String
+  assistant   Assistant @relation(fields: [assistantId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model PhoneNumber {
+  id        String     @id @default(cuid())
+  number    String     @unique
+  sid       String
+  authToken String
+  name      String
+  userId    String
+  user      User       @relation("UserPhoneNumbers", fields: [userId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Campaign  Campaign[]
+}
+
+model contact {
+  id          String  @id @default(cuid())
+  name        String?
+  phoneNumber String
+  email       String?
+  context     String?
+
+  contactListId String?
+  contactList   contactList? @relation(fields: [contactListId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model contactList {
+  id          String     @id @default(cuid())
+  name        String
+  description String
+  contacts    contact[]
+  userId      String
+  user        User       @relation("UserContactLists", fields: [userId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  Campaign    Campaign[]
+}
+
+model Campaign {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  // Existing relations
+  assistantId    String
+  voiceAssistant Assistant?  @relation(fields: [assistantId], references: [id])
+  numberId       String
+  number         PhoneNumber @relation(fields: [numberId], references: [id])
+  userId         String
+  user           User        @relation("UserVoiceCampaigns", fields: [userId], references: [id])
+  contactListId  String
+  contactList    contactList @relation(fields: [contactListId], references: [id])
+
+  // New fields
+  type                   CampaignType   @default(OUTBOUND_CALLS)
+  status                 CampaignStatus @default(PENDING)
+  startDate              DateTime?
+  endDate                DateTime?
+  maxAttempts            Int            @default(3) // Maximum call attempts per contact
+  callsPerDay            Int            @default(100) // Rate limiting
+  scheduleStart          DateTime? // Daily start time
+  scheduleEnd            DateTime? // Daily end time
+  timezone               String         @default("UTC")
+  maxCallsPerDay         Int            @default(100)
+  currentDayCallCount    Int            @default(0)
+  lastCallDate           DateTime?
+  startTime              String         @default("09:00")
+  endTime                String         @default("17:00")
+  leads                  Lead[]
+  marketingCampaignUsers User[]         @relation("UserCampaigns")
+  // Campaign results tracking
+  totalContacts          Int            @default(0)
+  completedContacts      Int            @default(0)
+  failedContacts         Int            @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Campaign execution logs
+  logs CampaignLog[]
+}
+
+model CampaignLog {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  message    String
+  level      String   @default("INFO")
+  timestamp  DateTime @default(now())
+}
+
+model CallHistory {
+  id             String    @id @default(cuid())
+  assistantName  String
+  campaignName   String
+  customerName   String?
+  customerNumber String
+  callAnswered   Boolean   @default(false)
+  callStartedAt  DateTime?
+  callEndedAt    DateTime?
+  callDuration   Int?
+  callSummary    String?   @db.Text
+  transcript     Json? // Store transcript as JSON for structured data
+  callSid        String?   @unique
+  ultravoxCallId String?   @unique
+  shortSummary   String?   @db.Text
+  metrics        Json? // Store call metrics
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  userId         String?
+  user           User?     @relation("UserCallHistory", fields: [userId], references: [id])
+}
+
+model KnowledgeBase {
+  id          String    @id @default(cuid())
+  name        String
+  content     String    @db.Text
+  assistantId String
+  assistant   Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model EmailCampaign {
+  id          String      @id @default(cuid())
+  name        String
+  tone        String
+  emailType   String // "generic" or "personalized"
+  context     String      @db.Text
+  status      String      @default("draft") // "draft", "sending", "completed", "failed", "partial"
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  leads       EmailLead[]
+  stats       Json? // Store campaign statistics
+  totalEmails Int         @default(0)
+  successful  Int         @default(0)
+  failed      Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model EmailLead {
+  id            String        @id @default(cuid())
+  email         String
+  name          String?
+  data          Json // Additional context/info from CSV
+  campaignId    String
+  status        String        @default("pending") // "pending", "sent", "failed"
+  sentAt        DateTime?
+  emailContent  String?       @db.Text // Store the generated email content
+  subject       String? // Store the email subject
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  emailCampaign EmailCampaign @relation(fields: [campaignId], references: [id])
+}
+
+
+// Add these models to your prisma/schema.prisma file
+
+// Business Plan model
+model BusinessPlan {
+  id          String         @id @default(cuid())
+  name        String
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planData    Json           // Stores the full business plan JSON
+  status      String         @default("active") // "active", "archived", "draft"
+  milestones  PlanMilestone[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+// Plan Milestone model for tracking progress
+model PlanMilestone {
+  id            String      @id @default(cuid())
+  businessPlanId String
+  businessPlan   BusinessPlan @relation(fields: [businessPlanId], references: [id], onDelete: Cascade)
+  title         String
+  description   String      @db.Text
+  timeframe     String
+  category      String
+  status        String      @default("not_started") // "not_started", "in_progress", "completed", "delayed"
+  progress      Int         @default(0) // 0-100%
+  tasks         PlanTask[]
+  resources     String[]
+  metrics       String[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// Plan Task model for tracking individual tasks
+model PlanTask {
+  id            String        @id @default(cuid())
+  milestoneId   String
+  milestone     PlanMilestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  description   String        @db.Text
+  status        String        @default("not_started") // "not_started", "in_progress", "completed"
+  dueDate       DateTime?
+  assignedTo    String?       // Could be a user ID if you implement team features
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+

@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Campaign" ADD COLUMN     "failed" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "successful" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "totalEmails" INTEGER NOT NULL DEFAULT 0;

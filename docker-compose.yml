@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    ports: ["5432:5432"]
+    volumes: ["./postgres-data:/var/lib/postgresql/data"]
+
+  redis:
+    image: redis:7
+    restart: always
+    ports: ["6379:6379"]
+
+  qdrant:
+    image: qdrant/qdrant
+    restart: always
+    ports: ["6333:6333"]
+
+  voice-agent:
+    build:
+      context: ./model-voice/server
+    depends_on: [db]
+    ports: ["5000:5000"]
+
+  web:
+    build: .
+    depends_on: [db, redis, qdrant, voice-agent]
+    command: sh -c "prisma migrate deploy && next start"
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: "postgresql://postgres:mysecretpassword@db:5432/flowai"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "your-super-secret-jwt-token-with-at-least-32-characters-1234567890"
+      QDRANT_URL: "http://qdrant:6333"
