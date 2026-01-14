@@ -161,14 +161,25 @@ async function generateBusinessPlan(businessData: any, company: any) {
     Format the response as a clean JSON object that can be parsed by JavaScript.
     `;
     
-    // Call Gemini API
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 8000,
-      },
-    });
+    // Call Gemini API with retry logic for rate limits
+    let result;
+    try {
+      result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 8000,
+        },
+      });
+    } catch (apiError: any) {
+      if (apiError.status === 429) {
+        return NextResponse.json(
+          { error: "Rate limit exceeded. Please wait a moment and try again. Google AI API has a limit of 15 requests per minute." },
+          { status: 429 }
+        );
+      }
+      throw apiError; // Re-throw other errors
+    }
     
     const response = result.response;
     const responseText = response.text();
