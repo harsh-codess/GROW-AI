@@ -1,4 +1,4 @@
-# FlowAI Local Development Setup
+# GrowAI Local Development Setup
 
 ## 📋 Prerequisites
 

@@ -15,7 +15,6 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, Fingerprint, LogIn } from "lucide-react";
 import { motion } from "framer-motion";
-import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -47,14 +46,15 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
       });
+      const json = await res.json();
 
-      if (result?.error) {
-        setError(result.error);
+      if (!res.ok) {
+        setError(json.message || "Invalid email or password");
         setIsLoading(false);
         return;
       }

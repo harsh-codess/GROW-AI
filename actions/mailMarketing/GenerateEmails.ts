@@ -176,7 +176,7 @@ const CustomMail = async (
 
         // Send email
         const { data, error } = await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "flowAi@harshdeep.tech",
+          from: process.env.RESEND_FROM_EMAIL || "growAi@harshdeep.tech",
           to: lead.email,
           subject: subject,
           html: personalizedContent,

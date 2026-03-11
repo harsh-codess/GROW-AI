@@ -24,7 +24,7 @@ const authOptions = {
     async signIn({ user, account }: { user: User; account: Account | null }) {
       if (account?.provider === "google") {
         try {
-          const baseUrl = process.env.NEXTAUTH_URL || "https://flow-ai-ruddy.vercel.app"
+          const baseUrl = process.env.NEXTAUTH_URL || "https://grow-ai-ruddy.vercel.app"
 
           // First try to login
           const loginResponse = await fetch(`${baseUrl}/api/auth/google-login`, {

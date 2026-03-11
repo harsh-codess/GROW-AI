@@ -4,10 +4,10 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
-    default: "FlowAI - AI-Powered Marketing Suite for Startups",
-    template: "%s | FlowAI",
+    default: "GrowAI - AI-Powered Marketing Suite for Startups",
+    template: "%s | GrowAI",
   },
-  description: "Transform your startup's marketing with AI. Create content, generate product images, and build customer engagement - all with FlowAI.",
+  description: "Transform your startup's marketing with AI. Create content, generate product images, and build customer engagement - all with GrowAI.",
 };
 
 export default function MarketingLayout({

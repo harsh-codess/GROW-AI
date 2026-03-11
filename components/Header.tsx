@@ -80,9 +80,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-[70px] px-4 py-2">
           <Link href="/" className="relative flex-shrink-0 group">
             <div className="flex items-center">
-             
-              <img src={"/logo.png"} alt="Logo" width={80}  height={80}/>
-                
+              <span className="text-xl font-bold text-[#bcee45]">Grow AI</span>
             </div>
           </Link>
 
@@ -164,7 +162,7 @@ const Header = () => {
                   <span className="text-[#161616] font-bold">F</span>
                 </div>
                 <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#bcee45] to-[#dcff65]">
-                  FlowAI
+                  GrowAI
                 </span>
               </div>
             </Link>

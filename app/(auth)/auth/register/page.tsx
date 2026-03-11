@@ -35,7 +35,7 @@ export default function RegisterPage() {
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-4 flex items-center">
               <Terminal className="mr-3 h-8 w-8 text-[#bcee45]" />
-              <img src="/logo.png" alt="Logo" height={100} width={100} />
+              <span className="text-2xl font-bold text-[#bcee45]">Grow AI</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-400">
               AI-Powered Marketing Suite for Startups
@@ -100,7 +100,7 @@ export default function RegisterPage() {
                 </div>
               </div>
               <p className="mt-2 text-sm text-gray-400">
-                "FlowAI has completely transformed our marketing. We've increased engagement by 40% while cutting our time investment in half."
+                "GrowAI has completely transformed our marketing. We've increased engagement by 40% while cutting our time investment in half."
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function RegisterPage() {
               System <span className="text-[#bcee45]">Registration</span>
             </h2>
             <p className="text-gray-400 mt-2">
-              Join thousands of startups using FlowAI
+              Join thousands of startups using GrowAI
             </p>
           </div>
           

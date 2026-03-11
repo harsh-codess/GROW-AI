@@ -174,7 +174,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img
                       src="/landing-1.png"
-                      alt="FlowAI Dashboard Preview"
+                      alt="GrowAI Dashboard Preview"
                       className="w-[700px] h-[700px] object-contain"
                       onError={(e) => {
                         // Fallback if image doesn't exist
@@ -296,7 +296,7 @@ export default function HomePage() {
                 </span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-                Watch how FlowAI
+                Watch how GrowAI
                 <span className="bg-clip-text text-transparent block bg-gradient-to-r from-[#bcee45] to-[#dcff65] mt-1">
                   transforms your workflow
                 </span>
@@ -454,7 +454,7 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-xl text-gray-400 mb-8">
-              Join thousands of innovative companies already using FlowAI to grow their business.
+              Join thousands of innovative companies already using GrowAI to grow their business.
             </p>
             <Link href="/auth/register">
               <Button size="lg" className="bg-[#bcee45] hover:bg-[#dcff65] text-[#161616] px-8 py-6 text-base font-medium relative overflow-hidden group">
@@ -495,7 +495,7 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-lg text-gray-400">
-              Join thousands of satisfied customers who have transformed their marketing strategies with FlowAI
+              Join thousands of satisfied customers who have transformed their marketing strategies with GrowAI
             </p>
           </div>
 
@@ -560,7 +560,7 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-lg text-gray-400">
-              Everything you need to know about FlowAI and how it can help your business
+              Everything you need to know about GrowAI and how it can help your business
             </p>
           </div>
 
@@ -595,7 +595,7 @@ export default function HomePage() {
                   Start your AI marketing journey today
                 </h2>
                 <p className="text-gray-400 mb-6">
-                  Join over 10,000 companies already using FlowAI to revolutionize their marketing strategy.
+                  Join over 10,000 companies already using GrowAI to revolutionize their marketing strategy.
                 </p>
                 <Link href="/auth/register">
                   <Button className="bg-[#bcee45] hover:bg-[#dcff65] text-[#161616] px-8 py-6 text-base font-medium relative overflow-hidden group">
@@ -629,7 +629,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#bcee45] to-[#dcff65]">FlowAI</h3>
+              <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#bcee45] to-[#dcff65]">GrowAI</h3>
               <p className="text-gray-500">
                 AI-powered marketing suite designed to help startups grow faster with less effort.
               </p>
@@ -667,7 +667,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-[#323232] mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p>© 2025 FlowAI. All rights reserved.</p>
+            <p>© 2025 GrowAI. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="#" className="hover:text-[#bcee45] transition">Privacy</Link>
               <Link href="#" className="hover:text-[#bcee45] transition">Terms</Link>
@@ -799,7 +799,7 @@ const testimonials = [
     role: "Marketing Director",
     company: "TechStart",
     avatar: "/images/testimonials/sarah.jpg",
-    quote: "FlowAI has transformed how we approach content creation. We've reduced our marketing production time by 70% while increasing engagement by 45%.",
+    quote: "GrowAI has transformed how we approach content creation. We've reduced our marketing production time by 70% while increasing engagement by 45%.",
     date: "June 15, 2024"
   },
   {
@@ -807,7 +807,7 @@ const testimonials = [
     role: "Founder & CEO",
     company: "Pulse Commerce",
     avatar: "/images/testimonials/michael.jpg",
-    quote: "The AI-generated product images are incredible. Our conversion rates have increased by 28% since implementing FlowAI into our workflow.",
+    quote: "The AI-generated product images are incredible. Our conversion rates have increased by 28% since implementing GrowAI into our workflow.",
     date: "May 22, 2024"
   },
   {
@@ -826,16 +826,16 @@ const faqs = [
     answer: "Our AI content generation uses advanced language models trained on marketing best practices. Simply input your brand guidelines, target audience, and content goals, and the AI will generate optimized content specifically for your brand."
   },
   {
-    question: "Can I integrate FlowAI with my existing tools?",
-    answer: "Yes! FlowAI integrates seamlessly with popular tools like Shopify, WooCommerce, Mailchimp, HubSpot, and more. Our API also allows for custom integrations with your existing systems."
+    question: "Can I integrate GrowAI with my existing tools?",
+    answer: "Yes! GrowAI integrates seamlessly with popular tools like Shopify, WooCommerce, Mailchimp, HubSpot, and more. Our API also allows for custom integrations with your existing systems."
   },
   {
     question: "Is there a limit to how many AI images I can create?",
     answer: "Each plan comes with a specified number of AI-generated images per month. Starter plans include 20 images, Professional plans include 50, and Enterprise plans offer unlimited image generation."
   },
   {
-    question: "Do I need technical skills to use FlowAI?",
-    answer: "Not at all! FlowAI is designed with a user-friendly interface that requires no technical expertise. Our intuitive dashboard makes it easy for anyone on your team to create AI-powered content."
+    question: "Do I need technical skills to use GrowAI?",
+    answer: "Not at all! GrowAI is designed with a user-friendly interface that requires no technical expertise. Our intuitive dashboard makes it easy for anyone on your team to create AI-powered content."
   },
   {
     question: "Can I cancel my subscription at any time?",

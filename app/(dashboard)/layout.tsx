@@ -86,8 +86,7 @@ export default function DashboardLayout({
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="flex items-center gap-2 group">
-                <img src="/logo.png" alt="Logo" height={80} width={80} className="ml-4"/>
-            
+                <span className="ml-4 text-xl font-bold text-[#bcee45]">Grow AI</span>
             </Link>
           </div>
           

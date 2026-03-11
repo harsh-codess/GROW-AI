@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-app = FastAPI(title="FlowAI Voice Agent API")
+app = FastAPI(title="GrowAI Voice Agent API")
 
 # Add CORS middleware
 app.add_middleware(
@@ -16,7 +16,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "FlowAI Voice Agent API is running"}
+    return {"message": "GrowAI Voice Agent API is running"}
 
 @app.get("/health")
 async def health_check():

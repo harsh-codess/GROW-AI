@@ -7,7 +7,7 @@ import { Providers } from "@/components/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FlowAI - AI-Powered Marketing Suite for Startups",
+  title: "GrowAI - AI-Powered Marketing Suite for Startups",
   description: " Marketing Suite for Startups",
 };
 
