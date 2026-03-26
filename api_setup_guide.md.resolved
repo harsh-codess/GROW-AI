@@ -1,0 +1,369 @@
+# GROW-AI — Complete API & Service Setup Guide
+
+Your project uses **15 external services** + **3 self-hosted Docker services**. Here's everything you need to set up, organized by priority.
+
+---
+
+## Quick Overview
+
+| # | Service | Feature | Free? | Monthly Cost (Paid) | Priority |
+|---|---------|---------|-------|---------------------|----------|
+| 1 | **PostgreSQL** (Docker) | Database | ✅ Self-hosted | Free | 🔴 Required |
+| 2 | **Redis** (Docker) | Job queue (BullMQ) | ✅ Self-hosted | Free | 🔴 Required |
+| 3 | **Qdrant** (Docker) | Vector DB for RAG chat | ✅ Self-hosted | Free | 🔴 Required |
+| 4 | **Google Gemini** | Core AI engine | ✅ Free tier | Pay-per-use after | 🔴 Required |
+| 5 | **Upstash Redis** | Rate limiting / caching | ✅ 10k req/day | $0.2/100k commands | 🔴 Required |
+| 6 | **NextAuth / JWT** | Authentication | ✅ Free (library) | Free | 🔴 Required |
+| 7 | **Google OAuth** | Google login + YouTube | ✅ Free | Free | 🟡 Optional |
+| 8 | **Cloudinary** | Image/video hosting & CDN | ✅ 25 credits/mo | ~$89/mo (Plus) | 🟡 Optional |
+| 9 | **Resend** | Email campaigns | ✅ 100 emails/day | $20/mo (Pro) | 🟡 Optional |
+| 10 | **Twilio** | Voice call infrastructure | 🟡 Trial credits | ~$0.013/min | 🟡 Optional |
+| 11 | **Ultravox** | AI voice conversation engine | ❓ Contact sales | Varies | 🟡 Optional |
+| 12 | **Replicate** | AI video generation | ❌ Pay-per-use | ~$0.032/sec (GPU) | 🟡 Optional |
+| 13 | **Bannerbear** | Marketing banner generation | 🟡 Trial only | $49/mo (Starter) | 🟡 Optional |
+| 14 | **Instagram (Meta)** | Social integration | ✅ Free | Free | ⚪ Optional |
+| 15 | **LinkedIn** | Social integration | ✅ Free | Free | ⚪ Optional |
+| 16 | **UploadThing** | File uploads | ✅ 2GB free | $10/mo (Pro) | ⚪ Not actively used |
+
+---
+
+## 🔴 REQUIRED — App Won't Start Without These
+
+### 1. PostgreSQL, Redis, Qdrant (Docker)
+
+**What they do:** PostgreSQL is the main database, Redis powers the BullMQ job queue (document processing), Qdrant is the vector database for RAG-based AI chat.
+
+**Cost:** Free (self-hosted via Docker)
+
+**Setup:**
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Run: `docker-compose up -d db redis qdrant`
+3. This starts PostgreSQL on `:5432`, Redis on `:6379`, Qdrant on `:6333`
+4. Run database migrations:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+**Env vars (already set):**
+```env
+DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/flowai"
+QDRANT_URL="http://localhost:6333"
+```
+
+---
+
+### 2. Google Gemini API
+
+**What it does:** Powers ALL AI features — content generation, chat assistant, email copy, product photo generation, video scene generation, competitor analysis, business planning.
+
+**Cost:** ✅ Free tier (15 RPM, 1M tokens/day for Flash models). Paid: $0.075/1M input tokens for Gemini 2.0 Flash.
+
+**Used in:** [video-action.ts](file:///Users/harshsmac/GROW-AI/actions/video/video-action.ts), [GenerateEmails.ts](file:///Users/harshsmac/GROW-AI/actions/mailMarketing/GenerateEmails.ts), [chat/route.ts](file:///Users/harshsmac/GROW-AI/app/api/chat/route.ts), [content-generator/route.ts](file:///Users/harshsmac/GROW-AI/app/api/dashboard/content-generator/route.ts), `competiotionAnalysis/`, `business-planner/`, photoshoot page  
+**Models used:** `gemini-2.0-flash`, `gemini-2.0-flash-exp-image-generation`, `gemini-1.5-flash`
+
+**Setup:**
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
+2. Sign in with your Google account
+3. Click **"Create API Key"**
+4. Copy the key
+
+**Env var:**
+```env
+GEMINI_API_KEY="your-gemini-api-key"
+```
+
+---
+
+### 3. Upstash Redis
+
+**What it does:** Rate limiting on API routes (e.g., video generation is limited to 2 requests per 30 seconds). Separate from the Docker Redis which handles job queues.
+
+**Cost:** ✅ Free tier: 10,000 commands/day, 256MB storage. Paid: $0.2 per 100k commands.
+
+**Used in:** [video-action.ts](file:///Users/harshsmac/GROW-AI/actions/video/video-action.ts) (rate limiting via `@upstash/ratelimit`)
+
+**Setup:**
+1. Go to [Upstash Console](https://console.upstash.com/)
+2. Create a free account
+3. Click **"Create Database"** → Select region closest to you → Choose **Free** plan
+4. After creation, copy the **REST URL** and **REST Token** from the dashboard
+
+**Env vars:**
+```env
+UPSTASH_REDIS_REST_URL="https://xxx.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="AXxxxx..."
+```
+
+---
+
+### 4. NextAuth Secret
+
+**What it does:** Signs JWT tokens for user authentication. This is just a random secret string, not an external API.
+
+**Cost:** Free
+
+**Setup:**
+```bash
+openssl rand -base64 32
+```
+
+**Env vars:**
+```env
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="<paste-generated-secret>"
+```
+
+---
+
+## 🟡 OPTIONAL — Enable Specific Features
+
+### 5. Google OAuth (Google Login + YouTube Integration)
+
+**What it does:** Allows users to sign in with Google. Also required for YouTube channel integration (analytics, connecting YouTube accounts).
+
+**Cost:** ✅ Free
+
+**Used in:** [auth.ts](file:///Users/harshsmac/GROW-AI/auth.ts) (login), [social/youtube/auth/route.ts](file:///Users/harshsmac/GROW-AI/app/api/social/youtube/auth/route.ts) (YouTube)
+
+**Setup:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project (or use existing)
+3. Navigate to **APIs & Services → Credentials**
+4. Click **"Create Credentials" → "OAuth Client ID"**
+5. Application type: **Web application**
+6. Add **Authorized redirect URIs:**
+   - `http://localhost:3000/api/auth/callback/google`
+   - `http://localhost:3000/api/social/youtube/callback`
+7. Copy the **Client ID** and **Client Secret**
+8. Enable these APIs in **APIs & Services → Library:**
+   - YouTube Data API v3
+   - YouTube Analytics API
+
+**Env vars:**
+```env
+GOOGLE_CLIENT_ID="xxxx.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="GOCSPX-xxxx"
+YOUTUBE_REDIRECT_URL="http://localhost:3000/api/social/youtube/callback"
+```
+
+---
+
+### 6. Cloudinary
+
+**What it does:** Hosts and processes images/videos. Used for product photoshoot uploads, AI video storage, content image hosting, and fallback slideshow creation.
+
+**Cost:** ✅ Free tier: 25 credits/mo (~25 transformations + 1GB storage). Paid: Plus plan at ~$89/mo.
+
+**Used in:** [video-action.ts](file:///Users/harshsmac/GROW-AI/actions/video/video-action.ts) (video hosting), [content-generator/route.ts](file:///Users/harshsmac/GROW-AI/app/api/dashboard/content-generator/route.ts) (content images), [newVideo.ts](file:///Users/harshsmac/GROW-AI/actions/video/newVideo.ts) (video URL hosting)
+
+**Setup:**
+1. Go to [Cloudinary](https://cloudinary.com/) → Sign up
+2. After signup, go to your **Dashboard**
+3. Copy **Cloud Name**, **API Key**, and **API Secret** from the dashboard
+
+**Env vars:**
+```env
+CLOUDINARY_CLOUD_NAME="dxxxxxxxxx"
+CLOUDINARY_API_KEY="123456789012345"
+CLOUDINARY_API_SECRET="xxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+---
+
+### 7. Resend (Email Marketing)
+
+**What it does:** Sends AI-generated personalized and bulk marketing emails to leads uploaded via CSV.
+
+**Cost:** ✅ Free tier: 100 emails/day, 1 domain. Paid: $20/mo (5k emails/mo, custom domains).
+
+**Used in:** [GenerateEmails.ts](file:///Users/harshsmac/GROW-AI/actions/mailMarketing/GenerateEmails.ts) (both generic and personalized email campaigns)
+
+**Setup:**
+1. Go to [Resend](https://resend.com/) → Sign up
+2. Navigate to **API Keys** → Create a new key
+3. To send from a custom domain (not `onboarding@resend.dev`):
+   - Go to **Domains** → Add your domain
+   - Add the DNS records Resend provides (DKIM, SPF, DMARC)
+
+**Env vars:**
+```env
+RESEND_API_KEY="re_xxxxxxxxxxxx"
+RESEND_FROM_EMAIL="marketing@yourdomain.com"
+RESEND_REPLY_TO_EMAIL="hello@yourdomain.com"
+```
+
+---
+
+### 8. Twilio (Voice Call Infrastructure)
+
+**What it does:** Makes actual phone calls for voice sales campaigns. Works with Ultravox to connect AI voice agents to real phone calls.
+
+**Cost:** 🟡 Trial: $15.50 credit (enough for ~100 test calls). Paid: ~$0.013/min outbound, $1/mo per phone number.
+
+**Used in:** [startCampaign.ts](file:///Users/harshsmac/GROW-AI/actions/voice-agent/startCampaign.ts) (creating calls, tracking status)
+
+**Setup:**
+1. Go to [Twilio](https://www.twilio.com/) → Sign up
+2. Verify your phone number
+3. From the **Console Dashboard**, copy your **Account SID** and **Auth Token**
+4. Buy a phone number: **Phone Numbers → Buy a Number** → Get a local number
+
+**Env vars:**
+```env
+TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+TWILIO_AUTH_TOKEN="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+TWILIO_PHONE_NUMBER="+1234567890"
+```
+
+---
+
+### 9. Ultravox (AI Voice Agent)
+
+**What it does:** Powers the conversational AI voice agent that talks to customers on calls. Creates an AI-driven voice conversation via Twilio's stream.
+
+**Cost:** ❓ Contact for pricing. The service is relatively new and pricing may vary.
+
+**Used in:** [startCampaign.ts](file:///Users/harshsmac/GROW-AI/actions/voice-agent/startCampaign.ts) (creating AI call sessions, fetching transcripts)
+
+**Setup:**
+1. Go to [Ultravox](https://www.ultravox.ai/)
+2. Sign up / request API access
+3. Once approved, get your API key from the dashboard
+
+**Env vars:**
+```env
+ULTRAVOX_API_KEY="your-ultravox-api-key"
+```
+
+> [!IMPORTANT]
+> Twilio and Ultravox work together. Both are needed for the voice agent feature. Without either, voice campaigns won't work.
+
+---
+
+### 10. Replicate (AI Video Generation)
+
+**What it does:** Generates marketing videos from product images using AI models (specifically `minimax/video-01-director`). Videos are then uploaded to Cloudinary.
+
+**Cost:** ❌ Pay-per-use only. ~$0.032/sec of GPU time. A typical video generation could cost $0.50-$2.00.
+
+**Used in:** [actions/video/newVideo.ts](file:///Users/harshsmac/GROW-AI/actions/video/newVideo.ts), [app/actions/video/newVideo.ts](file:///Users/harshsmac/GROW-AI/app/actions/video/newVideo.ts)
+
+**Setup:**
+1. Go to [Replicate](https://replicate.com/) → Sign up with GitHub
+2. Navigate to **Account Settings → API Tokens**
+3. Create a new token
+
+**Env vars:**
+```env
+REPLICATE_API_TOKEN="r8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+> [!NOTE]
+> Replicate requires a payment method after your free credits are used. The `minimax/video-01-director` model is used for video generation.
+
+---
+
+### 11. Bannerbear (Marketing Banner Generation)
+
+**What it does:** Generates professional marketing banners/images for content posts using pre-designed templates. Used in the content generator feature.
+
+**Cost:** 🟡 Free trial available (limited images). Paid: $49/mo Starter (100 images), $149/mo Business (500 images).
+
+**Used in:** [content-generator/route.ts](file:///Users/harshsmac/GROW-AI/app/api/dashboard/content-generator/route.ts) (generating images for blog posts, social media, ads)
+
+**Setup:**
+1. Go to [Bannerbear](https://www.bannerbear.com/) → Sign up
+2. Create a **Project** → Design a **Template** (or use a pre-made one)
+3. Copy the template ID (currently hardcoded as `1eGqK9b3zPgwDnaYpP` in the code — you'll need your own)
+4. Go to **Settings → API Key** → Copy your key
+
+**Env vars:**
+```env
+BANNERBEAR_API_KEY="bb_pr_xxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+> [!WARNING]
+> The code uses a hardcoded template ID `1eGqK9b3zPgwDnaYpP`. You'll need to create your own template in Bannerbear and update this ID in [app/api/dashboard/content-generator/route.ts](file:///Users/harshsmac/GROW-AI/app/api/dashboard/content-generator/route.ts) (line 396).
+
+---
+
+### 12. Instagram (Meta) Integration
+
+**What it does:** Connects user Instagram accounts to view profile data, media, and post analytics. Uses Instagram Basic Display API.
+
+**Cost:** ✅ Free
+
+**Used in:** [social/instagram/auth/route.ts](file:///Users/harshsmac/GROW-AI/app/api/social/instagram/auth/route.ts), [social/instagram/data/route.ts](file:///Users/harshsmac/GROW-AI/app/api/social/instagram/data/route.ts)
+
+**Setup:**
+1. Go to [Meta for Developers](https://developers.facebook.com/) → Create a developer account
+2. Click **"Create App"** → Choose **"Consumer"** type
+3. Add **"Instagram Basic Display"** product to your app
+4. Under **Instagram Basic Display → Basic Display Settings:**
+   - Add **Valid OAuth Redirect URIs:** `http://localhost:3000/api/social/instagram/callback`
+   - Add **Deauthorize Callback URL** and **Data Deletion Request URL**
+5. Under **App Roles → Instagram Testers**, add your Instagram account as a tester
+6. On Instagram, go to **Settings → Apps & Websites → Tester Invites** and accept
+
+**Env vars:**
+```env
+INSTAGRAM_APP_ID="123456789012345"
+INSTAGRAM_APP_SECRET="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+INSTAGRAM_REDIRECT_URI="http://localhost:3000/api/social/instagram/callback"
+```
+
+---
+
+### 13. LinkedIn Integration
+
+**What it does:** Connects user LinkedIn accounts for social media analytics and potential content publishing.
+
+**Cost:** ✅ Free
+
+**Used in:** [social/linkedin/auth/route.ts](file:///Users/harshsmac/GROW-AI/app/api/social/linkedin/auth/route.ts), [social/linkedin/data/route.ts](file:///Users/harshsmac/GROW-AI/app/api/social/linkedin/data/route.ts)
+
+**Setup:**
+1. Go to [LinkedIn Developers](https://www.linkedin.com/developers/) → Create an app
+2. Under the **Auth** tab:
+   - Copy **Client ID** and **Client Secret**
+   - Add **Redirect URL:** `http://localhost:3000/api/social/linkedin/callback`
+3. Under **Products** tab, request access to:
+   - **Share on LinkedIn** (for `w_member_social` scope)
+   - **Sign In with LinkedIn using OpenID Connect** (for `openid email profile` scopes)
+
+**Env vars:**
+```env
+LINKEDIN_CLIENT_ID="xxxxxxxxxxxx"
+LINKEDIN_CLIENT_SECRET="xxxxxxxxxxxxxxxx"
+LINKEDIN_REDIRECT_URI="http://localhost:3000/api/social/linkedin/callback"
+```
+
+---
+
+## ⚪ NOT ACTIVELY USED
+
+### 14. UploadThing
+
+**Status:** Package is installed (`@uploadthing/react`, `uploadthing`) but **no code references were found** in the project. It may be planned for future use or was replaced by direct Cloudinary uploads.
+
+**If you decide to use it later:**
+- Go to [UploadThing](https://uploadthing.com/) → Sign up → Create an app
+- Free tier: 2GB storage, $10/mo for Pro
+
+---
+
+## Summary: Minimum Viable Setup
+
+To get the app running with core features, you need **only 4 things:**
+
+| Step | Service | Time |
+|------|---------|------|
+| 1 | Docker (PostgreSQL + Redis + Qdrant) | 5 min |
+| 2 | Google Gemini API key | 2 min |
+| 3 | Upstash Redis account | 5 min |
+| 4 | Generate NEXTAUTH_SECRET | 1 min |
+
+**Total: ~13 minutes** to get the basic app running with AI chat, content generation, business planning, and competitor analysis.
+
+For the full experience (voice, email, video, social integrations), add the optional services as needed based on which features you want to test.

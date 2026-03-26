@@ -163,8 +163,9 @@ export default function EmailMarketingPage() {
     fetchStats();
     
     // Animate the glow effect
+    let mounted = true;
     const animateGlow = async () => {
-      while (true) {
+      while (mounted) {
         await glowControls.start({
           opacity: [0.3, 0.5, 0.3],
           transition: { duration: 3, ease: "easeInOut" }
@@ -173,6 +174,7 @@ export default function EmailMarketingPage() {
     };
     
     animateGlow();
+    return () => { mounted = false; };
   }, [glowControls]);
 
   const handleFileUpload = async () => {
@@ -645,6 +647,7 @@ export default function EmailMarketingPage() {
                         accept=".csv" 
                         ref={fileInputRef} 
                         className="hidden"
+                        onChange={handleFileUpload}
                       />
                       <div className="flex gap-4">
                         <label htmlFor="csv">

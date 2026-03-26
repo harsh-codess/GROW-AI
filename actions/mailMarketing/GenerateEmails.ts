@@ -7,10 +7,10 @@ import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 // import { auth } from "@clerk/nextjs";
 import { getSessionUser } from "@/lib/auth/auth";
-import type { Campaign, Lead } from "@/lib/generated/prisma";
+import type { EmailCampaign, EmailLead } from "@/lib/generated/prisma";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -26,8 +26,8 @@ interface GenerateEmailsParams {
   template: string;
 }
 
-interface CampaignWithLeads extends Campaign {
-  leads: Lead[];
+interface CampaignWithLeads extends EmailCampaign {
+  leads: EmailLead[];
 }
 
 export async function generateAndSendEmails({
@@ -174,10 +174,14 @@ const CustomMail = async (
           }
         });
 
-        // Send email
+        // Send email — in test mode, override recipient to your own verified address
+        const toAddress = process.env.RESEND_TEST_MODE === "true"
+          ? (process.env.RESEND_TEST_EMAIL || "harshgidwani2007@gmail.com")
+          : lead.email;
+
         const { data, error } = await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "growAi@harshdeep.tech",
-          to: lead.email,
+          from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+          to: toAddress,
           subject: subject,
           html: personalizedContent,
           replyTo: process.env.RESEND_REPLY_TO_EMAIL,
@@ -341,7 +345,7 @@ const GenericMail = async (
 
           // Send email
           const { data, error } = await resend.emails.send({
-            from: process.env.RESEND_FROM_EMAIL || "onboarding@harsdeep",
+            from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
             to: lead.email,
             subject: subject,
             html: emailContent,

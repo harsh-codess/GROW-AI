@@ -195,7 +195,7 @@ export async function chatWithMemories(message: string): Promise<ChatResponse> {
     const memories = await searchMemories(message);
     
     // Get the model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
     // Prepare the context from memories
     const context = memories.results

@@ -6,7 +6,8 @@ import { Redis } from "@upstash/redis";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth/auth";
-import { v2 as cloudinary } from 'cloudinary';
+import { isValidBase64Image, extractBase64Data } from "@/app/lib/image-validation";
+import { uploadImageToCloudinary } from "@/app/lib/cloudinary-upload";
 
 const apiKey = process.env.GEMINI_API_KEY;
 const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
@@ -32,13 +33,6 @@ const ratelimit = new Ratelimit({
 });
 
 const genAI = new GoogleGenerativeAI(apiKey);
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 const PHOTOGRAPHY_STYLES = {
   minimal: {
@@ -127,15 +121,15 @@ export async function createPhotographySession(
     });
 
     // Upload original image to Cloudinary
-    const originalUpload = await cloudinary.uploader.upload(imageData, {
-      folder: `product-photography/${user.companyId}`,
-      resource_type: 'image'
-    });
+    const originalUpload = await uploadImageToCloudinary(
+      imageData,
+      `product-photography/${user.companyId}`
+    );
 
     // Generate images using Gemini
-    const base64Data = imageData.split(',')[1];
+    const base64Data = extractBase64Data(imageData);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp-image-generation",
+      model: "gemini-2.5-flash-image",
       generationConfig: {
         temperature: 0.6, // Slightly lower temperature for more predictable results
         // @ts-expect-error - this is a bug in the types
@@ -159,17 +153,19 @@ export async function createPhotographySession(
     ]);
 
     const response = await result.response;
-    const generatedImage = response.candidates?.[0].content.parts[1].inlineData?.data;
+    const parts = response.candidates?.[0]?.content?.parts ?? [];
+    const imagePart = parts.find((p: any) => p.inlineData?.data);
+    const generatedImage = imagePart?.inlineData?.data;
 
     if (!generatedImage) {
       throw new Error("Failed to generate image");
     }
 
     // Upload generated image to Cloudinary
-    const generatedUpload = await cloudinary.uploader.upload(`data:image/jpeg;base64,${generatedImage}`, {
-      folder: `product-photography/${user.companyId}`,
-      resource_type: 'image'
-    });
+    const generatedUpload = await uploadImageToCloudinary(
+      `data:image/jpeg;base64,${generatedImage}`,
+      `product-photography/${user.companyId}`
+    );
 
     // Save the generated image with Cloudinary URLs
     await prisma.productImage.create({
@@ -215,28 +211,6 @@ export async function selectImage(imageId: string) {
   } catch (error) {
     console.error("Error selecting image:", error);
     throw error;
-  }
-}
-
-function isValidBase64Image(base64String: string): boolean {
-  try {
-    if (!/^data:image\/(jpeg|png|jpg);base64,/.test(base64String)) {
-      return false;
-    }
-
-    const base64Data = base64String.split(',')[1];
-    if (!base64Data || !/^[A-Za-z0-9+/=]+$/.test(base64Data)) {
-      return false;
-    }
-
-    const decodedSize = Math.ceil((base64Data.length * 3) / 4);
-    if (decodedSize > 10 * 1024 * 1024) {
-      return false;
-    }
-
-    return true;
-  } catch {
-    return false;
   }
 }
 

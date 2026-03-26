@@ -129,8 +129,9 @@ export default function DashboardPage() {
     fetchAllData();
     
     // Animate the glow effect
+    let mounted = true;
     const animateGlow = async () => {
-      while (true) {
+      while (mounted) {
         await glowControls.start({
           opacity: [0.3, 0.5, 0.3],
           transition: { duration: 3, ease: "easeInOut" }
@@ -139,6 +140,7 @@ export default function DashboardPage() {
     };
     
     animateGlow();
+    return () => { mounted = false; };
   }, []);
   
   useEffect(() => {

@@ -119,7 +119,7 @@ export async function createProductVideo(
     // Generate images for selected angles using Gemini
     const base64Data = imageData.split(',')[1];
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp-image-generation",
+      model: "gemini-2.5-flash-image",
       generationConfig: {
         temperature: 0.7,
         // @ts-expect-error - this is a bug in the types
@@ -151,7 +151,9 @@ export async function createProductVideo(
       ]);
 
       const response = await result.response;
-      const generatedImage = response.candidates?.[0].content.parts[1].inlineData?.data;
+      const parts = response.candidates?.[0]?.content?.parts ?? [];
+      const imagePart = parts.find((p: any) => p.inlineData?.data);
+      const generatedImage = imagePart?.inlineData?.data;
 
       if (!generatedImage) {
         throw new Error(`Failed to generate image for ${angle.name} angle`);

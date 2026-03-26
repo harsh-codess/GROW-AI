@@ -90,8 +90,9 @@ export default function PhotoshootPage() {
     });
     
     // Animate the glow effect
+    let mounted = true;
     const animateGlow = async () => {
-      while (true) {
+      while (mounted) {
         await glowControls.start({
           opacity: [0.3, 0.5, 0.3],
           transition: { duration: 3, ease: "easeInOut" }
@@ -100,6 +101,7 @@ export default function PhotoshootPage() {
     };
     
     animateGlow();
+    return () => { mounted = false; };
   }, [glowControls]);
 
   // Dynamic loading text

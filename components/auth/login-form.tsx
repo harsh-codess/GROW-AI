@@ -170,7 +170,7 @@ export function LoginForm() {
                 variant="outline"
                 type="button"
                 className="flex items-center justify-center gap-2 py-5 font-normal border-[#323232] text-gray-300 bg-[#232323] hover:border-[#bcee45]/30"
-                onClick={() => signIn("google", { redirect: true, callbackUrl: "/dashboard" })}
+                onClick={() => router.push("/api/auth/signin/google")}
                 disabled={isLoading}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
