@@ -1,0 +1,4 @@
+backend 
+docker-compose up -d db redis qdrant
+frontend 
+npm run dev

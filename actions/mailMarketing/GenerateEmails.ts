@@ -10,7 +10,7 @@ import { getSessionUser } from "@/lib/auth/auth";
 import type { EmailCampaign, EmailLead } from "@/lib/generated/prisma";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 

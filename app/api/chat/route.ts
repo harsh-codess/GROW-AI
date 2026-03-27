@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       .join('\n\n');
 
     // Get the model
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Create the prompt
     const prompt = `You are a helpful AI assistant. Use the following context to answer the question. If the context doesn't contain relevant information, say so.

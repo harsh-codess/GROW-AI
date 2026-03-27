@@ -370,7 +370,7 @@ async function generateContent(prompt: string): Promise<any> {
     try {
    
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
      
     })

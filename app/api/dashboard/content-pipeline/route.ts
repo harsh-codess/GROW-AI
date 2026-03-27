@@ -210,7 +210,7 @@ Do not use placeholder text or generic language.
 Focus on what makes this feature valuable to customers.
     `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 

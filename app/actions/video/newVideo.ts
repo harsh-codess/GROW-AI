@@ -56,7 +56,7 @@ export async function generateVideo(
         // Generate video using Veo 3.1 with image input
         console.log("[VEO] Starting video generation...");
         let operation = await ai.models.generateVideos({
-            model: "veo-3.1-generate-preview",
+            model: "veo-3.1-fast-generate-preview",
             prompt: prompt,
             image: {
                 imageBytes: imageBase64,
