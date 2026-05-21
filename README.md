@@ -1,6 +1,6 @@
 # GrowIT
 
-AI-powered marketing platform designed to help startups grow faster. Create content, generate product visuals, run voice campaigns, send email blasts, and analyze competitors — all from one dashboard powered by Google Gemini AI.
+AI-powered marketing platform designed to help startups grow faster. Create content, generate product visuals, run voice campaigns, send email blasts, and analyze competitors — all from one dashboard powered by Google Gemini AI. deployed on cloudflare
 
 ## Features
 
